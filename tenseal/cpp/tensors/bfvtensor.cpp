@@ -372,7 +372,7 @@ shared_ptr<BFVTensor> BFVTensor::sum_batch_inplace() {
 }
 
 shared_ptr<BFVTensor> BFVTensor::polyval_inplace(
-    const vector<double>& coefficients) {
+    const vector<int64_t>& coefficients) {
     if (coefficients.size() == 0) {
         throw invalid_argument(
             "the coefficients vector need to have at least one element");

@@ -2,7 +2,7 @@ import tenseal as ts
 import pytest
 import copy
 import pickle
-
+import numpy as np
 
 @pytest.fixture(scope="module")
 def context():
@@ -416,6 +416,66 @@ def test_size(context):
     for size in range(1, 10):
         vec = ts.bfv_vector(context, [1] * size)
         assert vec.size() == size, "Size of encrypted vector is incorrect."
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        # null polynom
+        ([0, 1, 2, 3, 4], [0]),
+        ([0, 1, 2, 3, 4], [0, 0]),
+        ([0, 1, 2, 3, 4], [0, 0, 0]),
+        # power of two coeff
+        ([0, 1, 2, 3, 4], [1, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 1, 0, 1]),
+        # random coeff
+        ([0, 1, 2, 3, 4], [-4, -2, 5]),
+        ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [3, 2, 4, 5]),
+        ([0, -1, -2, -3, -4], [-3, -2, -4, -5, 1]),
+        ([2 for i in range(100000)], [-3, -2, -4, -5, 1]),
+    ],
+)
+def test_polynomial(context, data, polynom):
+    context.generate_galois_keys()
+    ct = ts.bfv_vector(context, data)
+    expected = [np.polyval(polynom[::-1], x) for x in data]
+    result = ct.polyval(polynom)
+
+    decrypted_result = result.decrypt()
+    assert decrypted_result == expected, "Polynomial evaluation is incorrect."
+
+
+@pytest.mark.parametrize(
+    "data, polynom",
+    [
+        # null polynom
+        ([0, 1, 2, 3, 4], [0]),
+        ([0, 1, 2, 3, 4], [0, 0]),
+        ([0, 1, 2, 3, 4], [0, 0, 0]),
+        # power of two coeff
+        ([0, 1, 2, 3, 4], [1, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 1]),
+        ([0, 1, 2, 3, 4], [0, 1, 1, 0, 1]),
+        # random coeff
+        ([0, 1, 2, 3, 4], [-4, -2, 5]),
+        ([0, 0, 0, 0, 0], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [0, 0, 0, 1]),
+        ([0, 1, 2, 3, 4], [3, 2, 4, 5]),
+        ([0, -1, -2, -3, -4], [-3, -2, -4, -5, 1]),
+        ([2 for i in range(100000)], [-3, -2, -4, -5, 1]),
+    ],
+)
+def test_polynomial_inplace(context, data, polynom):
+    context.generate_galois_keys()
+    ct = ts.bfv_vector(context, data)
+    expected = [np.polyval(polynom[::-1], x) for x in data]
+    ct.polyval_(polynom)
+
+    decrypted_result = ct.decrypt()
+    assert decrypted_result == expected, "Polynomial evaluation is incorrect."
 
 
 @pytest.mark.parametrize(

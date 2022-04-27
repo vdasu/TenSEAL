@@ -38,7 +38,7 @@ using namespace std;
  * * encrypted_t EncryptedTensor::mul_plain_inplace(plain_t to_mul) = 0;
  * * encrypted_t EncryptedTensor::mul_plain_inplace(const PlainTensor<plain_t>&
  *to_mul) = 0;
- * * encrypted_t EncryptedTensor::polyval_inplace(const vector<double>&
+ * * encrypted_t EncryptedTensor::polyval_inplace(const vector<plain_t>&
  *coefficients) = 0;
  * * void EncryptedTensor::load(const string& vec) = 0;
  * * string EncryptedTensor::save() const = 0;

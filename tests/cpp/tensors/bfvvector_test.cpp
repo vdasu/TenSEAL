@@ -295,6 +295,36 @@ TEST_F(BFVVectorTest, TestBFVSerializationSize) {
     ASSERT_TRUE(2 * sym_buffer.size() > pk_buffer.size());
 }
 
+TEST_P(BFVVectorTest, TestBFVVectorPolyval) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto l = BFVVector::Create(ctx, vector<int64_t>({0, 1, 2, 3, 4}));
+
+    auto res = l->polyval({0, 1, 1, 0, 1});
+    auto decr = res->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({0, 3, 22, 93, 276}));
+}
+
+TEST_P(BFVVectorTest, TestBFVVectorPolyvalInplace) {
+    auto enc_type = get<1>(GetParam());
+
+    auto ctx =
+        TenSEALContext::Create(scheme_type::bfv, 8192, 1032193, {}, enc_type);
+    ASSERT_TRUE(ctx != nullptr);
+    ctx->generate_galois_keys();
+
+    auto l = BFVVector::Create(ctx, vector<int64_t>({0, 1, 2, 3, 4}));
+
+    l->polyval_inplace({0, 1, 1, 0, 1});
+    auto decr = l->decrypt();
+    EXPECT_THAT(decr.data(), ElementsAreArray({0, 3, 22, 93, 276}));
+}
+
 TEST_P(BFVVectorTest, TestBFVAddBigVector) {
     auto should_serialize_first = get<0>(GetParam());
     auto enc_type = get<1>(GetParam());

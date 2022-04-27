@@ -226,6 +226,8 @@ void bind_bfv_vector(py::module &m) {
         .def("dot_", &BFVVector::dot_plain_inplace)
         .def("sum", &BFVVector::sum, py::arg("axis") = 0)
         .def("sum_", &BFVVector::sum_inplace, py::arg("axis") = 0)
+        .def("polyval", &BFVVector::polyval)
+        .def("polyval_", &BFVVector::polyval_inplace)
         // python arithmetic
         .def("__add__", &BFVVector::add)
         .def("__add__", py::overload_cast<const int64_t &>(
